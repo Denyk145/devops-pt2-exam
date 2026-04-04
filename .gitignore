@@ -1,1 +1,43 @@
+# macOS
+.DS_Store
 
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraform.lock.hcl
+
+# tfvars / secrets
+*.tfvars
+*.tfvars.json
+secrets.auto.tfvars
+terraform.tfvars
+
+# Ansible / SSH
+*.retry
+*.pem
+*.key
+ansible.log
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+
+# local env files
+.env
+.env.*
+
+# temp
+tmp/
+temp/
