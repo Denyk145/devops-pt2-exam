@@ -15,7 +15,6 @@
       - lsb-release
       - conntrack
       - socat
-      - cri-tools
       - docker.io
     state: present
 
