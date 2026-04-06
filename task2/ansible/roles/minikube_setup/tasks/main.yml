@@ -54,7 +54,15 @@
 
 - name: Start Minikube
   shell: |
-    minikube start --driver={{ minikube_driver }} --memory={{ minikube_memory }} --cpus={{ minikube_cpus }} --profile={{ minikube_profile }} --force
+    minikube start \
+      --driver=docker \
+      --memory={{ minikube_memory }} \
+      --cpus={{ minikube_cpus }} \
+      --profile={{ minikube_profile }} \
+      --force \
+      --container-runtime=docker \
+      --alsologtostderr \
+      --v=1
   args:
     creates: /root/.minikube/profiles/{{ minikube_profile }}/config.json
     executable: /bin/bash
