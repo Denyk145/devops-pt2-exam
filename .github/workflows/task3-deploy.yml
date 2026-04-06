@@ -1,1 +1,84 @@
+name: Task3 Build and Deploy App
+
+on:
+	workflow_dispatch:
+	push:
+		paths:
+			- 'task3/**'
+			- '.github/workflows/task3-deploy.yml'
+
+jobs:
+	build-and-push:
+		runs-on: ubuntu-latest
+
+		steps:
+			- name: Checkout exam repo
+				uses: actions/checkout@v4
+
+			- name: Clone app develop branch
+				run: git clone --branch develop https://github.com/YulianSalo/devops-exam-pt2.git app-develop
+
+			- name: Clone app tag 1.0.0
+				run: git clone --branch 1.0.0 https://github.com/YulianSalo/devops-exam-pt2.git app-release
+
+			- name: Log in to Docker Hub
+				uses: docker/login-action@v3
+				with:
+					username: ${{ secrets.DOCKERHUB_USERNAME }}
+					password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+			- name: Build develop image
+				run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/devops-exam-pt2:develop ./app-develop
+
+			- name: Build release image
+				run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/devops-exam-pt2:1.0.0 ./app-release
+
+			- name: Push develop image
+				run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/devops-exam-pt2:develop
+
+			- name: Push release image
+				run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/devops-exam-pt2:1.0.0
+
+	deploy:
+		needs: build-and-push
+		runs-on: ubuntu-latest
+
+		steps:
+			- name: Checkout exam repo
+				uses: actions/checkout@v4
+
+			- name: Setup SSH key
+				run: |
+					mkdir -p ~/.ssh
+					cat > ~/.ssh/stasiv_exam_key <<'EOF'
+					${{ secrets.SSH_PRIVATE_KEY }}
+					EOF
+					chmod 600 ~/.ssh/stasiv_exam_key
+
+			- name: Pre-check remote docker
+				run: |
+					ssh -i ~/.ssh/stasiv_exam_key -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.VM_HOST }} "docker --version"
+
+			- name: Copy deploy scripts
+				run: |
+					scp -i ~/.ssh/stasiv_exam_key -o StrictHostKeyChecking=no task3/scripts/deploy-dev.sh ${{ secrets.SSH_USER }}@${{ secrets.VM_HOST }}:/root/
+					scp -i ~/.ssh/stasiv_exam_key -o StrictHostKeyChecking=no task3/scripts/deploy-release.sh ${{ secrets.SSH_USER }}@${{ secrets.VM_HOST }}:/root/
+
+			- name: Replace dockerhub username in scripts
+				run: |
+					ssh -i ~/.ssh/stasiv_exam_key -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.VM_HOST }} \
+					"sed -i 's/YOUR_DOCKERHUB_USERNAME/${{ secrets.DOCKERHUB_USERNAME }}/g' /root/deploy-dev.sh /root/deploy-release.sh"
+
+			- name: Docker login on VM
+				run: |
+					ssh -i ~/.ssh/stasiv_exam_key -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.VM_HOST }} \
+					"echo '${{ secrets.DOCKERHUB_TOKEN }}' | docker login -u '${{ secrets.DOCKERHUB_USERNAME }}' --password-stdin"
+
+			- name: Deploy dev
+				run: |
+					ssh -i ~/.ssh/stasiv_exam_key -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.VM_HOST }} "bash /root/deploy-dev.sh"
+
+			- name: Deploy release
+				run: |
+					ssh -i ~/.ssh/stasiv_exam_key -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.VM_HOST }} "bash /root/deploy-release.sh"
 
