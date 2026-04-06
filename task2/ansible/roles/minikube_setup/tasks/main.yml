@@ -58,13 +58,12 @@
       --driver=docker \
       --memory={{ minikube_memory }} \
       --cpus={{ minikube_cpus }} \
-      --profile={{ minikube_profile }} \
       --force \
       --container-runtime=docker \
       --alsologtostderr \
       --v=1
   args:
-    creates: /root/.minikube/profiles/{{ minikube_profile }}/config.json
+    creates: /root/.minikube/profiles/minikube/config.json
     executable: /bin/bash
   when: not ansible_check_mode
 
@@ -78,7 +77,7 @@
 
 - name: Check kubectl nodes
   shell: |
-    minikube kubectl --profile={{ minikube_profile }} -- get nodes -o wide
+    minikube kubectl -- get nodes -o wide
   args:
     executable: /bin/bash
   register: kubectl_nodes
