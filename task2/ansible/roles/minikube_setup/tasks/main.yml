@@ -25,8 +25,11 @@
     state: present
     update_cache: yes
 
+- name: Reload systemd
+  command: systemctl daemon-reexec
+
 - name: Enable and start docker
-  systemd:
+  ansible.builtin.systemd:
     name: docker
     enabled: yes
     state: started
