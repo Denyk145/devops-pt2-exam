@@ -1,6 +1,5 @@
-resource "digitalocean_ssh_key" "default" {
-  name       = var.ssh_key_name
-  public_key = file("~/.ssh/stasiv_exam_key.pub")
+data "digitalocean_ssh_key" "default" {
+  name = var.ssh_key_name
 }
 
 resource "digitalocean_vpc" "main" {
@@ -15,7 +14,7 @@ resource "digitalocean_droplet" "node" {
   size     = var.droplet_size
   image    = var.image
   vpc_uuid = digitalocean_vpc.main.id
-  ssh_keys = [digitalocean_ssh_key.default.id]
+  ssh_keys = [data.digitalocean_ssh_key.default.id]
 }
 
 resource "digitalocean_firewall" "main" {

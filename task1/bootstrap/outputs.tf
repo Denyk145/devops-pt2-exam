@@ -1,20 +1,19 @@
-
-output "tfstate_bucket_name" {
-  description = "Name of the tfstate bucket"
+output "bucket_name" {
+  description = "Created Spaces bucket name"
   value       = digitalocean_spaces_bucket.tfstate.name
 }
 
-output "tfstate_bucket_region" {
-  description = "Region of the tfstate bucket"
+output "bucket_region" {
+  description = "Created Spaces bucket region"
   value       = digitalocean_spaces_bucket.tfstate.region
 }
 
-output "tfstate_backend_endpoint" {
-  description = "S3-compatible endpoint for Terraform backend"
-  value       = "https://${var.region}.digitaloceanspaces.com"
+output "ssh_key_name" {
+  description = "Created SSH key name"
+  value       = digitalocean_ssh_key.exam_key.name
 }
 
-output "tfstate_example_key" {
-  description = "Example state key for infra"
-  value       = "terraform/infra.tfstate"
+output "ssh_key_id" {
+  description = "Created SSH key id"
+  value       = digitalocean_ssh_key.exam_key.id
 }
