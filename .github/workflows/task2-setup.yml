@@ -1,0 +1,48 @@
+name: Task2 Ansible Setup
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'task2/**'
+      - '.github/workflows/task2-setup.yml'
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Ansible
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ansible
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          cat > ~/.ssh/stasiv_exam_key <<'EOF'
+          ${{ secrets.SSH_PRIVATE_KEY }}
+          EOF
+          chmod 600 ~/.ssh/stasiv_exam_key
+
+      - name: Create inventory
+        run: |
+          cat > task2/ansible/inventory.ini <<EOF
+          [minikube]
+          stasiv-node ansible_host=${{ secrets.VM_HOST }} ansible_user=${{ secrets.SSH_USER }} ansible_ssh_private_key_file=~/.ssh/stasiv_exam_key
+          EOF
+
+      - name: Syntax check
+        working-directory: task2/ansible
+        run: ansible-playbook -i inventory.ini --syntax-check playbook.yml
+
+      - name: Dry run
+        working-directory: task2/ansible
+        run: ansible-playbook -i inventory.ini playbook.yml --check
+
+      - name: Apply
+        working-directory: task2/ansible
+        run: ansible-playbook -i inventory.ini playbook.yml

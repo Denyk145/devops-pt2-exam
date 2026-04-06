@@ -1,0 +1,5 @@
+- name: Install Kubernetes, Minikube and Helm
+  hosts: minikube
+  become: true
+  roles:
+    - minikube_setup
