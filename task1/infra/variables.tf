@@ -1,12 +1,5 @@
-
 variable "do_token" {
   description = "DigitalOcean API token"
-  type        = string
-  sensitive   = true
-}
-
-variable "ssh_public_key" {
-  description = "Public SSH key for Droplet access"
   type        = string
   sensitive   = true
 }
@@ -24,7 +17,7 @@ variable "vpc_name" {
 }
 
 variable "vpc_ip_range" {
-  description = "VPC CIDR"
+  description = "VPC CIDR range"
   type        = string
   default     = "10.10.10.0/24"
 }
@@ -42,19 +35,25 @@ variable "droplet_name" {
 }
 
 variable "droplet_size" {
-  description = "Droplet size"
+  description = "Droplet size for Minikube/Kubernetes"
   type        = string
-  default     = "s-2vcpu-4gb"
+  default     = "s-4vcpu-8gb"
 }
 
-variable "droplet_image" {
-  description = "Droplet image slug"
+variable "image" {
+  description = "Droplet OS image"
   type        = string
   default     = "ubuntu-24-04-x64"
 }
 
-variable "exam_bucket_name" {
-  description = "Exam bucket name"
+variable "ssh_key_name" {
+  description = "SSH key name in DigitalOcean"
+  type        = string
+  default     = "stasiv-exam-key"
+}
+
+variable "bucket_name" {
+  description = "Bucket name"
   type        = string
   default     = "stasiv-bucket"
 }

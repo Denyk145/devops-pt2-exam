@@ -1,35 +1,27 @@
-
-provider "digitalocean" {
-  token = var.do_token
+resource "digitalocean_ssh_key" "default" {
+  name       = var.ssh_key_name
+  public_key = file("~/.ssh/stasiv_exam_key.pub")
 }
 
-resource "digitalocean_vpc" "exam_vpc" {
-  name        = var.vpc_name
-  region      = var.region
-  ip_range    = var.vpc_ip_range
-  description = "VPC for DevOps exam resources"
+resource "digitalocean_vpc" "main" {
+  name     = var.vpc_name
+  region   = var.region
+  ip_range = var.vpc_ip_range
 }
 
-resource "digitalocean_ssh_key" "exam_key" {
-  name       = "${var.droplet_name}-ssh-key"
-  public_key = var.ssh_public_key
-}
-
-resource "digitalocean_droplet" "exam_node" {
+resource "digitalocean_droplet" "node" {
   name     = var.droplet_name
   region   = var.region
   size     = var.droplet_size
-  image    = var.droplet_image
-  vpc_uuid = digitalocean_vpc.exam_vpc.id
-
-  ssh_keys = [digitalocean_ssh_key.exam_key.fingerprint]
-
-  tags = ["exam", "stasiv"]
+  image    = var.image
+  vpc_uuid = digitalocean_vpc.main.id
+  ssh_keys = [digitalocean_ssh_key.default.id]
 }
 
-resource "digitalocean_firewall" "exam_firewall" {
-  name        = var.firewall_name
-  droplet_ids = [digitalocean_droplet.exam_node.id]
+resource "digitalocean_firewall" "main" {
+  name = var.firewall_name
+
+  droplet_ids = [digitalocean_droplet.node.id]
 
   inbound_rule {
     protocol         = "tcp"
@@ -84,10 +76,4 @@ resource "digitalocean_firewall" "exam_firewall" {
     port_range            = "1-65535"
     destination_addresses = ["0.0.0.0/0", "::/0"]
   }
-}
-
-resource "digitalocean_spaces_bucket" "exam_bucket" {
-  name   = var.exam_bucket_name
-  region = var.region
-  acl    = "private"
 }
