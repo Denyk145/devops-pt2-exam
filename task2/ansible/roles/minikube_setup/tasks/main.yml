@@ -70,7 +70,7 @@
 
 - name: Enable ingress addon
   shell: |
-    minikube addons enable ingress --profile={{ minikube_profile }}
+    minikube addons enable ingress --profile={{ minikube_profile }} || true
   args:
     executable: /bin/bash
   changed_when: false
