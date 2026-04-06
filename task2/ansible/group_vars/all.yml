@@ -1,5 +1,5 @@
 minikube_driver: docker
-minikube_memory: "4096"
+minikube_memory: "2048"
 minikube_cpus: "2"
 minikube_profile: "minikube"
 kubernetes_user: "root"

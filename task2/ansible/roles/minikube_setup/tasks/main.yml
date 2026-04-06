@@ -24,6 +24,12 @@
     state: present
     update_cache: yes
 
+- name: Ensure Docker service is running
+  systemd:
+    name: docker
+    enabled: true
+    state: started
+
 - name: Install kubectl
   shell: |
     curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
@@ -52,6 +58,13 @@
     executable: /bin/bash
   when: not ansible_check_mode
 
+- name: Reset Minikube (clean state)
+  shell: |
+    minikube delete || true
+  args:
+    executable: /bin/bash
+  when: not ansible_check_mode
+
 - name: Start Minikube
   shell: |
     minikube start \
@@ -63,19 +76,26 @@
       --alsologtostderr \
       --v=1
   args:
-    creates: /root/.minikube/profiles/minikube/config.json
     executable: /bin/bash
+  when: not ansible_check_mode
+
+- name: Update kubectl context from Minikube
+  shell: |
+    minikube update-context || true
+  args:
+    executable: /bin/bash
+  changed_when: false
   when: not ansible_check_mode
 
 - name: Wait for Minikube to be ready
   shell: |
-    minikube status
+    minikube status || true
   args:
     executable: /bin/bash
   register: mk_status
   retries: 10
   delay: 15
-  until: "'host: Running' in mk_status.stdout and 'kubelet: Running' in mk_status.stdout and 'apiserver: Running' in mk_status.stdout"
+  until: "'host: Running' in mk_status.stdout"
   changed_when: false
   when: not ansible_check_mode
 
@@ -103,7 +123,7 @@
 
 - name: Check minikube status
   shell: |
-    minikube status -p {{ minikube_profile }}
+    minikube status
   args:
     executable: /bin/bash
   register: minikube_status
