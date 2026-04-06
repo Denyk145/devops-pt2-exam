@@ -77,7 +77,10 @@
   when: not ansible_check_mode
 
 - name: Check kubectl nodes
-  command: kubectl get nodes -o wide
+  shell: |
+    minikube kubectl -- --profile={{ minikube_profile }} get nodes -o wide
+  args:
+    executable: /bin/bash
   register: kubectl_nodes
   changed_when: false
   when: not ansible_check_mode
