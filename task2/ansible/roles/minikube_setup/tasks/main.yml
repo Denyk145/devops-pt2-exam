@@ -1,4 +1,3 @@
-
 - name: Update apt cache
   apt:
     update_cache: yes
@@ -15,9 +14,9 @@
       - lsb-release
       - conntrack
       - socat
-      - docker.io
+      - python3
+      - python3-pip
     state: present
-
 
 - name: Install Docker
   apt:
@@ -25,20 +24,23 @@
     state: present
     update_cache: yes
 
-- name: Reload systemd
-  command: systemctl daemon-reexec
-
-- name: Enable and start docker
-  ansible.builtin.systemd:
-    name: docker
-    enabled: yes
-    state: started
-
 - name: Add root to docker group
   user:
     name: root
     groups: docker
     append: yes
+
+- name: Start docker if service exists
+  shell: |
+    if systemctl list-unit-files | grep -q '^docker\.service'; then
+      systemctl daemon-reload
+      systemctl enable docker
+      systemctl start docker
+    fi
+  args:
+    executable: /bin/bash
+  changed_when: false
+  when: not ansible_check_mode
 
 - name: Install kubectl
   shell: |
@@ -47,6 +49,8 @@
     rm -f kubectl
   args:
     creates: /usr/local/bin/kubectl
+    executable: /bin/bash
+  when: not ansible_check_mode
 
 - name: Install Minikube
   shell: |
@@ -55,47 +59,62 @@
     rm -f minikube-linux-amd64
   args:
     creates: /usr/local/bin/minikube
+    executable: /bin/bash
+  when: not ansible_check_mode
 
 - name: Install Helm
   shell: |
     curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
   args:
     creates: /usr/local/bin/helm
+    executable: /bin/bash
+  when: not ansible_check_mode
 
 - name: Start Minikube
   shell: |
     minikube start --driver={{ minikube_driver }} --memory={{ minikube_memory }} --cpus={{ minikube_cpus }} --profile={{ minikube_profile }} --force
   args:
     creates: /root/.minikube/profiles/{{ minikube_profile }}/config.json
+    executable: /bin/bash
+  when: not ansible_check_mode
 
 - name: Enable ingress addon
   shell: |
     minikube addons enable ingress --profile={{ minikube_profile }}
+  args:
+    executable: /bin/bash
   changed_when: false
+  when: not ansible_check_mode
 
 - name: Check kubectl nodes
   command: kubectl get nodes -o wide
   register: kubectl_nodes
   changed_when: false
+  when: not ansible_check_mode
 
 - name: Show kubectl nodes
   debug:
     var: kubectl_nodes.stdout_lines
+  when: not ansible_check_mode
 
 - name: Check minikube status
   command: minikube status --profile={{ minikube_profile }}
   register: minikube_status
   changed_when: false
+  when: not ansible_check_mode
 
 - name: Show minikube status
   debug:
     var: minikube_status.stdout_lines
+  when: not ansible_check_mode
 
 - name: Check helm version
   command: helm version
   register: helm_version
   changed_when: false
+  when: not ansible_check_mode
 
 - name: Show helm version
   debug:
     var: helm_version.stdout_lines
+  when: not ansible_check_mode
