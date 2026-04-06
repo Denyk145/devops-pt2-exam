@@ -1,19 +1,19 @@
 output "bucket_name" {
-  description = "Created Spaces bucket name"
-  value       = digitalocean_spaces_bucket.tfstate.name
+  description = "Existing Spaces bucket name"
+  value       = data.digitalocean_spaces_bucket.tfstate.name
 }
 
 output "bucket_region" {
-  description = "Created Spaces bucket region"
-  value       = digitalocean_spaces_bucket.tfstate.region
+  description = "Existing Spaces bucket region"
+  value       = data.digitalocean_spaces_bucket.tfstate.region
 }
 
 output "ssh_key_name" {
-  description = "Created SSH key name"
-  value       = digitalocean_ssh_key.exam_key.name
+  description = "Existing SSH key name"
+  value       = data.digitalocean_ssh_key.exam_key.name
 }
 
 output "ssh_key_id" {
-  description = "Created SSH key id"
-  value       = digitalocean_ssh_key.exam_key.id
+  description = "Existing SSH key id"
+  value       = data.digitalocean_ssh_key.exam_key.id
 }

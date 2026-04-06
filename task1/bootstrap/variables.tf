@@ -28,19 +28,8 @@ variable "bucket_region" {
   default     = "fra1"
 }
 
-variable "bucket_acl" {
-  description = "Bucket ACL"
-  type        = string
-  default     = "private"
-}
-
 variable "ssh_key_name" {
   description = "SSH key name in DigitalOcean"
   type        = string
   default     = "stasiv-exam-key"
-}
-
-variable "public_key" {
-  description = "Public SSH key content"
-  type        = string
 }
