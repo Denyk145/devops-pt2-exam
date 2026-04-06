@@ -69,17 +69,19 @@
 
 - name: Wait for Minikube to be ready
   shell: |
-    minikube status --format='{{.Host}} {{.Kubelet}} {{.APIServer}}'
+    minikube status
+  args:
+    executable: /bin/bash
   register: mk_status
   retries: 10
   delay: 15
-  until: "'Running' in mk_status.stdout"
+  until: "'host: Running' in mk_status.stdout and 'kubelet: Running' in mk_status.stdout and 'apiserver: Running' in mk_status.stdout"
   changed_when: false
   when: not ansible_check_mode
 
 - name: Enable ingress addon
   shell: |
-    minikube addons enable ingress --profile={{ minikube_profile }} || true
+    minikube addons enable ingress || true
   args:
     executable: /bin/bash
   changed_when: false
